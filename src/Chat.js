@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 
 
 const MessageInput = ({ onSendMessage, newMessage, setNewMessage, isDisabled }) => (
-  <div>
+  <div className="message-input">
     <input
       type="text"
       placeholder="Enter your message"
@@ -16,7 +16,7 @@ const MessageInput = ({ onSendMessage, newMessage, setNewMessage, isDisabled }) 
   </div>
 );
 const NameInput = ({ username, setUsername }) => (
-  <div class="user-container">
+  <div className="user-container">
     <input
       type="text"
       placeholder="Enter your username"
@@ -26,8 +26,8 @@ const NameInput = ({ username, setUsername }) => (
   </div>
 )
 
-const MessageList = ({ messageHistory }) => (
-  <div className="messages message-container">
+const MessageList = ({ chatMessagesRef, messageHistory }) => (
+  <div ref={chatMessagesRef} className="messages message-container">
     {messageHistory.map((msg, index) => (
       <div key={index}>
         <strong>{msg.user}:</strong> {msg.content}
@@ -39,6 +39,7 @@ const MessageList = ({ messageHistory }) => (
 
 const Chat = () => {
   const WS_URL = 'ws://localhost:8080/messages';
+  const chatMessagesRef = useRef(null);
 
   const [username, setUsername] = useState("");
   const [newMessage, setNewMessage] = useState("");
@@ -55,6 +56,10 @@ const Chat = () => {
     }
   }, [lastJsonMessage]);
 
+  useEffect(() =>{
+    chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight
+  }, [messageHistory])
+
   const handleClickSendMessage = () => {
     console.log("Called callback")
     sendJsonMessage({
@@ -63,20 +68,21 @@ const Chat = () => {
     })
   };
 
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: "Connecting",
-    [ReadyState.OPEN]: "Connected",
-    [ReadyState.CLOSING]: "Closing",
-    [ReadyState.CLOSED]: "Closed",
-    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
+  const {type, color} = {
+    [ReadyState.CONNECTING]: {type: "Connecting", color: "blue"},
+    [ReadyState.OPEN]: {type: "Connected",color: "green"},
+    [ReadyState.CLOSING]: {type: "Closing",color: "gray"},
+    [ReadyState.CLOSED]: {type: "Closed",color: "red"},
+    [ReadyState.UNINSTANTIATED]: {type: "Uninstantiated",color: "purple"}
   }[readyState];
 
   return (
     <div id="chat">
-      <h1>Chat</h1>
-      <div>Status: {connectionStatus}</div>
+      <h1>Websocket Chat</h1>
+      <br />
+      <div>Status: <span style={{color:color}}>{type}</span></div>
       <NameInput username={username} setUsername={setUsername} />
-      <MessageList messageHistory={messageHistory} />
+      <MessageList chatMessagesRef={chatMessagesRef} messageHistory={messageHistory} />
       <MessageInput
         onSendMessage={handleClickSendMessage}
         newMessage={newMessage}
