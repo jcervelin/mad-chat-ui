@@ -10,7 +10,7 @@ const MessageInput = ({ onSendMessage, newMessage, setNewMessage, isDisabled }) 
       value={newMessage}
       onChange={(e) => setNewMessage(e.target.value)}
     />
-    <button onClick={onSendMessage} disabled={isDisabled}>
+    <button onClick={onSendMessage} disabled={isDisabled || !newMessage}>
       Send
     </button>
   </div>
@@ -29,7 +29,7 @@ const NameInput = ({ username, setUsername }) => (
 const MessageList = ({ chatMessagesRef, messageHistory }) => (
   <div ref={chatMessagesRef} className="messages message-container">
     {messageHistory.map((msg, index) => (
-      <div key={index}>
+      <div className="message" key={index}>
         <strong>{msg.user}:</strong> {msg.content}
       </div>
     ))}
@@ -66,6 +66,7 @@ const Chat = () => {
       user: username,
       content: newMessage
     })
+    setNewMessage("")
   };
 
   const {type, color} = {

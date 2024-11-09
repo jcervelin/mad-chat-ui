@@ -35,6 +35,9 @@ body {
     flex-grow: 1; /* Takes up all available space */
     overflow-y: auto;
     scroll-behavior: smooth;
+    gap: 8px;
+    display: flex;
+    flex-direction: column;
 }
 
 h1 {
@@ -62,6 +65,11 @@ button {
 
 button:hover {
     background-color: #45a049;
+}
+
+button:disabled {
+    background-color: #dfdede;
+    pointer-events: none
 }
 
 .message-input {
